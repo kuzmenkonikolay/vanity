@@ -53,8 +53,12 @@ module Vanity
 
       def connect!
         @redis = @options[:redis] || Redis.new(@options)
-        @metrics = Redis::Namespace.new("vanity:metrics", :redis=>redis)
-        @experiments = Redis::Namespace.new("vanity:experiments", :redis=>redis)
+        @metrics = Redis::Namespace.new(redis_db_key('metrics'), :redis=>redis)
+        @experiments = Redis::Namespace.new(redis_db_key('experiments'), :redis=>redis)
+      end
+
+      def redis_db_key(name)
+        ENV['DEPLOYMENT_ENV'] && ENV['DEPLOYMENT_ENV'] != 'production' ? "#{ENV['DEPLOYMENT_ENV']}:vanity:#{name}" : "vanity:#{name}"
       end
 
       def to_s
